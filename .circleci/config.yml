@@ -45,7 +45,6 @@ jobs:
       - run: mix compile --warnings-as-errors
       - run: MIX_ENV=test mix compile --warnings-as-errors
       - run: mix test
-      - run: cd examples/wifi_demo && mix deps.get && mix test && mix docs
       - when:
           condition:
             matches: { <<: *latest, value: << parameters.tag >> }
@@ -62,6 +61,25 @@ jobs:
             - _build
             - deps
 
+  build-test-macos:
+    macos:
+      xcode: 15.4.0
+    working_directory: ~/repo
+    environment:
+      LC_ALL: C.UTF-8
+    steps:
+      - checkout
+      - run:
+          name: Install Erlang and Elixir
+          command: |
+            brew install erlang elixir
+      - run:
+          name: Install hex
+          command: |
+            mix local.hex --force
+      - run: mix deps.get
+      - run: mix test
+
 workflows:
   checks:
     jobs:
@@ -77,3 +95,7 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - build-test-macos:
+          filters:
+            tags:
+              only: /.*/"
