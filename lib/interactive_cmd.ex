@@ -29,21 +29,20 @@ defmodule InteractiveCmd do
   """
   @spec cmd(binary(), [binary()], keyword()) :: {binary(), exit_status :: non_neg_integer()}
   def cmd(cmd, args, options \\ []) do
+    ensure_user_drv()
+
     original_env = System.get_env()
 
     quoted_cmd = Enum.map_join([cmd | args], " ", &shell_quote/1)
 
-    # Everything after the trailing ; gets trimmed, so
-    # the filename that's appended to the end by Erlang's
-    # prompt editor support will get ignored.
-    script_cmd =
-      case :os.type() do
-        {:unix, :linux} -> "script -q /dev/null -c '#{escape_quote(quoted_cmd)};echo $?'>"
-        {:unix, _bsd} -> "script -q /dev/null sh -c '#{escape_quote(quoted_cmd)};echo $?'>"
-      end
+    # user_drv will append a filename to the command. `shim.sh` writes the
+    # exit status to this file.
+    shim = Application.app_dir(:interactive_cmd, ["priv", "shim.sh"])
+    script_cmd = "#{shim} #{script_flavor()} #{shell_quote(quoted_cmd)}"
 
     System.put_env(Keyword.get(options, :env, %{}))
     System.put_env("VISUAL", script_cmd)
+
     send(:user_drv, {self(), {:open_editor, ""}})
 
     result =
@@ -53,6 +52,13 @@ defmodule InteractiveCmd do
 
     restore_env(original_env)
     {"", parse_exit_status(result)}
+  end
+
+  defp script_flavor() do
+    case :os.type() do
+      {:unix, :linux} -> "gnu"
+      {:unix, _bsd} -> "bsd"
+    end
   end
 
   defp restore_env(original) do
@@ -66,7 +72,7 @@ defmodule InteractiveCmd do
   defp shell_quote(str), do: "'#{escape_quote(str)}'"
   defp escape_quote(str), do: String.replace(str, "'", "'\\''")
 
-  def parse_exit_status(output) when is_list(output) do
+  defp parse_exit_status(output) when is_list(output) do
     trimmed = output |> to_string() |> String.trim()
 
     case Integer.parse(trimmed) do
@@ -75,7 +81,10 @@ defmodule InteractiveCmd do
     end
   end
 
-  def parse_exit_code(output) when is_list(output) do
-    output |> to_string() |> parse_exit_code()
+  defp ensure_user_drv() do
+    # Start user_drv if running from a script.
+    if Process.whereis(:user_drv) == nil do
+      :user_drv.start([:"tty_sl -c -e", {Process.group_leader(), :tty}])
+    end
   end
 end

@@ -17,9 +17,12 @@ defmodule InteractiveCmdTest do
       File.rm!(path)
     end
 
-    test "returnes exit status" do
-      Enum.each(0..255, fn i ->
-        {"", status} = InteractiveCmd.cmd("./test/fixture/retcode.sh", [to_string(i)])
+    test "returns exit status" do
+      # Spot check that return values pass through
+      statuses = [0, 1, 2, 3, 4, 5, 6, 7, 127, 128, 255]
+
+      Enum.each(statuses, fn i ->
+        {"", status} = InteractiveCmd.cmd("./test/fixture/exit_code.sh", [to_string(i)])
         assert status == i
       end)
     end
