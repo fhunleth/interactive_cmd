@@ -38,7 +38,7 @@ defmodule InteractiveCmd do
     # prompt editor support will get ignored.
     script_cmd =
       case :os.type() do
-        {:unix, :linux} -> "script -q /dev/null -c #{shell_quote(quoted_cmd)};"
+        {:unix, :linux} -> "script -q /dev/null -c '#{escape_quote(quoted_cmd)};echo $?'>"
         {:unix, _bsd} -> "script -q /dev/null sh -c '#{escape_quote(quoted_cmd)};echo $?'>"
       end
 
