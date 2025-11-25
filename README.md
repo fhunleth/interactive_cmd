@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: 2025 Frank Hunleth
+  SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # InteractiveCmd
 
 **TODO: Add description**
