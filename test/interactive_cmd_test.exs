@@ -11,17 +11,24 @@ defmodule InteractiveCmdTest do
       path = "tmp_file.txt"
 
       _ = File.rm(path)
-      InteractiveCmd.cmd("touch", [path])
+      {"", 0} = InteractiveCmd.cmd("touch", [path])
 
       assert File.exists?(path)
       File.rm!(path)
+    end
+
+    test "returnes exit status" do
+      Enum.each(0..255, fn i ->
+        {"", status} = InteractiveCmd.cmd("./test/fixture/retcode.sh", [to_string(i)])
+        assert status == i
+      end)
     end
 
     test "paths with spaces" do
       path = "tmp_file with spaces.txt"
 
       _ = File.rm(path)
-      InteractiveCmd.cmd("touch", [path])
+      {"", 0} = InteractiveCmd.cmd("touch", [path])
 
       assert File.exists?(path)
       File.rm!(path)
@@ -31,7 +38,7 @@ defmodule InteractiveCmdTest do
       path = "tmp_file with ' and \".txt"
 
       _ = File.rm(path)
-      InteractiveCmd.cmd("touch", [path])
+      {"", 0} = InteractiveCmd.cmd("touch", [path])
 
       assert File.exists?(path)
       File.rm!(path)
@@ -46,9 +53,7 @@ defmodule InteractiveCmdTest do
       assert System.get_env(env_name) == nil
       _ = File.rm(path)
 
-      InteractiveCmd.cmd("sh", ["-c", "touch $#{env_name}"],
-        env: %{env_name => path}
-      )
+      {"", 0} = InteractiveCmd.cmd("sh", ["-c", "touch $#{env_name}"], env: %{env_name => path})
 
       assert File.exists?(path)
       File.rm!(path)
@@ -60,10 +65,11 @@ defmodule InteractiveCmdTest do
       path = "tmp_file.txt"
       _ = File.rm(path)
 
-      InteractiveCmd.cmd("sh", [
-        "-c",
-        "[ -t 0 ] && echo interactive > #{path} || echo non-interactive > #{path}"
-      ])
+      {"", 0} =
+        InteractiveCmd.cmd("sh", [
+          "-c",
+          "[ -t 0 ] && echo interactive > #{path} || echo non-interactive > #{path}"
+        ])
 
       assert File.read(path) == {:ok, "interactive\n"}
       File.rm!(path)

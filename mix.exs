@@ -55,7 +55,8 @@ defmodule InteractiveCmd.MixProject do
       links: %{
         "GitHub" => @source_url,
         "Changelog" => @source_url <> "/blob/main/CHANGELOG.md",
-        "REUSE Compliance" => "https://api.reuse.software/info/github.com/fhunleth/interactive_cmd"
+        "REUSE Compliance" =>
+          "https://api.reuse.software/info/github.com/fhunleth/interactive_cmd"
       }
     }
   end
@@ -65,7 +66,7 @@ defmodule InteractiveCmd.MixProject do
       extras: ["README.md", "CHANGELOG.md"],
       main: "readme",
       source_ref: "v#{@version}",
-      source_url: @source_url,
+      source_url: @source_url
     ]
   end
 
