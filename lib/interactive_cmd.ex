@@ -58,8 +58,16 @@ defmodule InteractiveCmd do
 
     result =
       receive do
-        {_pid, {:editor_data, output}} -> output
-        other -> IO.puts(:stderr, "GOT #{inspect(other)}")
+        {_pid, {:editor_data, output}} ->
+          output
+
+        other ->
+          IO.puts(:stderr, "GOT #{inspect(other)}")
+          2
+      after
+        10000 ->
+          IO.puts(:stderr, "TIMEOUT")
+          1
       end
 
     IO.puts(:stderr, "BACK!!!!!")
