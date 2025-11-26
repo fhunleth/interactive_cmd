@@ -33,14 +33,11 @@ defmodule InteractiveCmd do
     original_env = System.get_env()
 
     quoted_cmd = Enum.map_join([cmd | args], " ", &shell_quote/1)
-
-    # user_drv will append a filename to the command. `shim.sh` writes the
-    # exit status to this file.
-    shim = Application.app_dir(:interactive_cmd, ["priv", "shim.sh"])
-    script_cmd = "#{shim} #{script_flavor()} #{shell_quote(quoted_cmd)}"
+    visual_cmd = launcher_command()
 
     System.put_env(Keyword.get(options, :env, %{}))
-    System.put_env("VISUAL", script_cmd)
+    System.put_env("INTERACTIVE_CMD_COMMAND", quoted_cmd)
+    System.put_env("VISUAL", visual_cmd)
 
     send(:user_drv, {self(), {:open_editor, ""}})
 
@@ -53,10 +50,16 @@ defmodule InteractiveCmd do
     {"", parse_exit_status(result)}
   end
 
-  defp script_flavor() do
+  defp launcher_command() do
+    # $1 is the results filename from user_drv
     case :os.type() do
-      {:unix, :linux} -> "gnu"
-      {:unix, _bsd} -> "bsd"
+      {:unix, :linux} ->
+        # GNU version of script
+        ~s(sh -c 'script -q /dev/null -c "$INTERACTIVE_CMD_COMMAND"; echo $? > "$1"' sh)
+
+      {:unix, _bsd} ->
+        # BSD version of script
+        ~s(sh -c 'script -q /dev/null sh -c "$INTERACTIVE_CMD_COMMAND"; echo $? > "$1"' sh)
     end
   end
 
