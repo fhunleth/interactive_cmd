@@ -3,8 +3,6 @@ version = 1
 [[annotations]]
 path = [
  ".circleci/config.yml",
- ".formatter.exs",
- ".gitignore",
  "NOTICE",
  "REUSE.toml",
  "mix.exs",
