@@ -48,7 +48,7 @@ jobs:
             - v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
       - run: mix deps.get
       - run: MIX_ENV=test mix compile
-      - run: script -e /dev/null -c "mix test --trace"
+      - run: script -e /dev/null -c 'echo "START";mix test --trace --max-failures 1 --timeout 10000;echo "AFTER MIX: exit=$?";echo "DONE!"mix test --trace"'
       - when:
           condition:
             matches: { <<: *latest, value: << parameters.tag >> }

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 defmodule InteractiveCmdTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
   doctest InteractiveCmd
 
   describe "interactive_cmd/3" do
