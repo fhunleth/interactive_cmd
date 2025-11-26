@@ -46,7 +46,7 @@ jobs:
           keys:
             - v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
       - run: mix deps.get
-      - run: mix test
+      - run: script -e -q /dev/null -c "mix test"
       - when:
           condition:
             matches: { <<: *latest, value: << parameters.tag >> }
@@ -87,7 +87,7 @@ jobs:
           keys:
             - v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
       - run: mix deps.get
-      - run: mix test
+      - run: script -e -q /dev/null -c "mix test"
       - save_cache:
           key: v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
           paths:
