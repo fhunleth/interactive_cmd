@@ -12,10 +12,6 @@ defmodule DockerDemo do
   @container_name "interactive-cmd-demo-container"
 
   def run() do
-    IO.puts("\n╔" <> String.duplicate("═", 58) <> "╗")
-    IO.puts("║       InteractiveCmd - Docker Interactive Demo           ║")
-    IO.puts("╚" <> String.duplicate("═", 58) <> "╝\n")
-
     try do
       build_image()
       run_container()
@@ -23,27 +19,26 @@ defmodule DockerDemo do
       cleanup()
     end
 
-    IO.puts("\n✓ Demo complete!\n")
+    IO.puts("\nDone.\n")
   end
 
   defp build_image() do
-    IO.puts("📦 Building Docker image...")
+    IO.puts("Running 'docker build' to create an Alpine image for the demo...")
 
     case System.cmd("docker", ["build", "-t", @image_name, "./"], stderr_to_stdout: true) do
       {_output, 0} ->
-        IO.puts("✓ Image built successfully\n")
+        IO.puts("Image built successfully\n")
 
       {output, _} ->
-        IO.puts("✗ Failed to build image:")
+        IO.puts("Failed to build image:")
         IO.puts(output)
         System.halt(1)
     end
   end
 
   defp run_container() do
-    IO.puts("🚀 Starting interactive container session...")
-    IO.puts("   You can run commands inside the Alpine Linux container.")
-    IO.puts("   Type 'exit' when done.\n")
+    IO.puts("Starting an interactive container session from within an Elixir script...")
+    IO.puts("\nType 'exit' when done.\n")
 
     {_, exit_status} =
       InteractiveCmd.cmd("docker", [
@@ -56,22 +51,18 @@ defmodule DockerDemo do
         "/bin/sh"
       ])
 
-    if exit_status == 0 do
-      IO.puts("\n✓ Container session completed successfully")
-    else
-      IO.puts("\n✗ Container session exited with status: #{exit_status}")
-    end
+    IO.puts("\nContainer session exited with status: #{exit_status}")
   end
 
   defp cleanup() do
-    IO.puts("\n🧹 Cleaning up...")
+    IO.puts("\nCleaning up demo container...")
 
     case System.cmd("docker", ["rmi", @image_name], stderr_to_stdout: true) do
       {_output, 0} ->
-        IO.puts("✓ Image removed")
+        IO.puts("Image removed")
 
       {_output, _} ->
-        IO.puts("⚠ Image may have already been removed")
+        IO.puts("Image may have already been removed")
     end
   end
 end

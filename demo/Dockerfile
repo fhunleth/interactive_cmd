@@ -9,6 +9,9 @@ FROM alpine:latest
 RUN apk add --no-cache \
     coreutils \
     procps \
-    util-linux
+    util-linux \
+    btop
+
+ENV LANG=en_US.UTF-8
 
 CMD ["/bin/sh"]
