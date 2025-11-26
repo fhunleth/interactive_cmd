@@ -48,7 +48,7 @@ jobs:
             - v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
       - run: mix deps.get
       - run: MIX_ENV=test mix compile
-      - run: script -e -q /dev/null -c "mix test --timeout 10000"
+      - run: script -e -q /dev/null -c "echo START;mix test --timeout 10000;echo DONE!"
       - when:
           condition:
             matches: { <<: *latest, value: << parameters.tag >> }
@@ -90,7 +90,7 @@ jobs:
             - v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
       - run: mix deps.get
       - run: MIX_ENV=test mix compile
-      - run: script -e -q /dev/null -c "mix test --timeout 10000"
+      - run: script -e -q /dev/null -c "echo START;mix test --timeout 10000;echo DONE!"
       - save_cache:
           key: v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
           paths:
