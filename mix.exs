@@ -66,7 +66,8 @@ defmodule InteractiveCmd.MixProject do
       extras: ["README.md", "CHANGELOG.md"],
       main: "readme",
       source_ref: "v#{@version}",
-      source_url: @source_url
+      source_url: @source_url,
+      assets: %{"demo" => "demo"}
     ]
   end
 

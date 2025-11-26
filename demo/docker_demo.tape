@@ -1,5 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Frank Hunleth
-#
+# SPDX-FileCopyrightText: None
 # SPDX-License-Identifier: CC0-1.0
 #
 # VHS documentation: https://github.com/charmbracelet/vhs
@@ -13,10 +12,12 @@
 
 Output docker_demo.gif
 
-Set FontSize 15
-Set Width 1024
-Set Height 600
-Set TypingSpeed 50ms
+Set FontSize 13
+Set Width 790
+Set Height 500
+Set TypingSpeed 40ms
+Set Framerate 24
+Set PlaybackSpeed 1.0
 
 Type "elixir docker_demo.exs"
 Sleep 1s
@@ -26,15 +27,17 @@ Enter
 Sleep 6s
 
 # ls
+Ctrl+L
 Type "# We're in the container now. Take a quick look..."
 Sleep 1s
 Enter
 Type "ls -l"
 Sleep 1s
 Enter
-Sleep 2s
+Sleep 5s
 
 # btop
+Ctrl+L
 Type "# Interactive apps work like you'd expect. Here's btop..."
 Sleep 1s
 Enter
@@ -47,8 +50,8 @@ Type "q"
 Sleep 1s
 
 # Interrupted sleep
-Enter
-Type "# CTRL+C doesn't get intercepted! Use it to stop sleeping..."
+Ctrl+L
+Type "# CTRL+C doesn't get intercepted! Try it..."
 Sleep 1s
 Enter
 Sleep 1s
@@ -57,9 +60,10 @@ Sleep 1s
 Enter
 Sleep 2s
 Ctrl+C
-Sleep 2s
+Sleep 3s
 
 # Show we're still in the shell
+Ctrl+L
 Type "# All done. Going to exit the container and return to Elixir..."
 Sleep 1s
 Enter
