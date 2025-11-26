@@ -36,6 +36,8 @@ defmodule InteractiveCmd do
   """
   @spec cmd(binary(), [binary()], options()) :: {binary(), exit_status :: non_neg_integer()}
   def cmd(cmd, args, options \\ []) do
+    ensure_user_drv()
+
     original_env = System.get_env()
     original_dir = File.cwd!()
 
@@ -92,6 +94,12 @@ defmodule InteractiveCmd do
     case Integer.parse(trimmed) do
       {status, ""} when status >= 0 -> status
       _ -> 255
+    end
+  end
+
+  defp ensure_user_drv() do
+    if Process.whereis(:user_drv) == nil do
+      raise RuntimeError, "This doesn't appear to be an interactive session"
     end
   end
 end
