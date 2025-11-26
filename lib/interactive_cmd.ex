@@ -59,6 +59,7 @@ defmodule InteractiveCmd do
     result =
       receive do
         {_pid, {:editor_data, output}} -> output
+        other -> IO.puts(:stderr, "GOT #{inspect(other)}")
       end
 
     IO.puts(:stderr, "BACK!!!!!")
