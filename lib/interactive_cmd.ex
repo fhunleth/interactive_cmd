@@ -7,6 +7,11 @@ defmodule InteractiveCmd do
   Run interactive shell commands from mostly pure Elixir
   """
 
+  @typedoc """
+  Options for `cmd/3`
+  """
+  @type options() :: [env: %{String.t() => String.t()}]
+
   @doc """
   Starts an interactive command
 
@@ -28,7 +33,7 @@ defmodule InteractiveCmd do
   intentionally similar to `System.cmd/3` to allow `InteractiveCmd,cnd/3` to be
   swapped in quickly when needed.
   """
-  @spec cmd(binary(), [binary()], keyword()) :: {binary(), exit_status :: non_neg_integer()}
+  @spec cmd(binary(), [binary()], options()) :: {binary(), exit_status :: non_neg_integer()}
   def cmd(cmd, args, options \\ []) do
     original_env = System.get_env()
 
