@@ -3,6 +3,7 @@ version = 1
 [[annotations]]
 path = [
  ".circleci/config.yml",
+ ".github/workflows/*",
  "NOTICE",
  "REUSE.toml",
  "mix.exs",
