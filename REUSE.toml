@@ -9,7 +9,7 @@ path = [
  "REUSE.toml",
  "mix.exs",
  "mix.lock",
- "test/fixture/retcode.sh"
+ "demo/*.gif"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "None"

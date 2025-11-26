@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-FileCopyrightText: None
+# SPDX-License-Identifier: CC0-1.0
 
 # Parameters:
 # $1 - bsd or gnu version of script

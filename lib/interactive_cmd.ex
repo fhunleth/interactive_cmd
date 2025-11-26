@@ -4,7 +4,7 @@
 #
 defmodule InteractiveCmd do
   @moduledoc """
-  Documentation for `InteractiveCmd`.
+  Run interactive shell commands from mostly pure Elixir
   """
 
   @doc """
@@ -23,9 +23,10 @@ defmodule InteractiveCmd do
   * `:env` - a map of string key/value pairs to be put into the environment.
     See `System.put_env/1`.
 
-  Returns `{"", exit_status}` where the first element is always an empty string and
-  the second is the exit status of the command. This return value is intentionally similar to
-  `System.cmd/3` to allow `InteractiveCmd,cnd/3` to be swapped in quickly when needed.
+  Returns `{"", exit_status}` where the first element is always an empty string
+  and the second is the exit status of the command. This return value is
+  intentionally similar to `System.cmd/3` to allow `InteractiveCmd,cnd/3` to be
+  swapped in quickly when needed.
   """
   @spec cmd(binary(), [binary()], keyword()) :: {binary(), exit_status :: non_neg_integer()}
   def cmd(cmd, args, options \\ []) do
