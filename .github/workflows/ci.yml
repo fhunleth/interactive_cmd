@@ -1,0 +1,192 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-license:
+    name: License Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: REUSE Compliance Check
+        uses: fsfe/reuse-action@v5
+
+  test-alpine:
+    name: ${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-alpine
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - elixir: '1.19.3'
+            erlang: '28.1.1'
+            alpine: '3.22.2'
+            lint: true
+          - elixir: '1.18.3'
+            erlang: '27.3.4'
+            alpine: '3.22.2'
+          - elixir: '1.17.3'
+            erlang: '27.3.4'
+            alpine: '3.21.5'
+          - elixir: '1.16.3'
+            erlang: '26.2.5.11'
+            alpine: '3.21.3'
+
+    container:
+      image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-alpine-${{ matrix.alpine }}
+
+    env:
+      LC_ALL: C.UTF-8
+      ERL_CRASH_DUMP: /tmp/erl_crash.dump
+      ERL_CRASH_DUMP_SECONDS: 10
+      MIX_ENV: test
+
+    steps:
+      - name: Install system dependencies
+        run: apk add --no-cache build-base util-linux git
+
+      - uses: actions/checkout@v4
+
+      - name: Install hex and rebar
+        run: mix local.hex --force
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            _build
+            deps
+          key: ${{ runner.os }}-mix-${{ matrix.elixir }}-${{ matrix.erlang }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ matrix.elixir }}-${{ matrix.erlang }}-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile (test)
+        run: mix compile
+
+      - name: Run tests
+        run: script -e /dev/null -c 'echo "START";mix test --trace --max-failures 1 --timeout 10000;echo "AFTER MIX exit=$?";echo "DONE!" < /dev/null'
+
+      # Additional checks for latest version
+      - name: Check formatting
+        if: matrix.lint
+        run: mix format --check-formatted
+
+      - name: Check unused dependencies
+        if: matrix.lint
+        run: mix deps.unlock --check-unused
+
+      - name: Generate docs
+        if: matrix.lint
+        run: mix docs
+
+      - name: Build hex package
+        if: matrix.lint
+        run: mix hex.build
+
+      - name: Run Credo
+        if: matrix.lint
+        run: mix credo -a --strict
+
+      - name: Run Dialyzer
+        if: matrix.lint
+        run: mix dialyzer
+
+      - name: Compile with warnings as errors (dev)
+        if: matrix.lint
+        run: mix compile --warnings-as-errors
+        env:
+          MIX_ENV: dev
+
+      - name: Compile with warnings as errors (test)
+        if: matrix.lint
+        run: mix compile --warnings-as-errors
+
+  test-ubuntu:
+    name: ${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-ubuntu
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - elixir: '1.19.3'
+            erlang: '28.1.1'
+            ubuntu: 'noble-20251013'
+          - elixir: '1.18.3'
+            erlang: '27.3.4'
+            ubuntu: 'noble-20251013'
+
+    container:
+      image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-ubuntu-${{ matrix.ubuntu }}
+
+    env:
+      LC_ALL: C.UTF-8
+      MIX_ENV: test
+
+    steps:
+      - name: Install system dependencies
+        run: apt-get update && apt-get install -y build-essential ca-certificates git
+
+      - uses: actions/checkout@v4
+
+      - name: Install hex and rebar
+        run: mix local.hex --force
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            _build
+            deps
+          key: ${{ runner.os }}-mix-${{ matrix.elixir }}-${{ matrix.erlang }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ matrix.elixir }}-${{ matrix.erlang }}-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile (test)
+        run: mix compile
+
+      - name: Run tests
+        run: script -e -q /dev/null -c "echo START;mix test --timeout 10000;echo DONE!"
+
+  test-macos:
+    name: macOS
+    runs-on: macos-15
+
+    env:
+      LC_ALL: C.UTF-8
+      MIX_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Erlang and Elixir
+        run: brew install erlang elixir
+
+      - name: Install hex and rebar
+        run: mix local.hex --force
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            _build
+            deps
+          key: ${{ runner.os }}-mix-macos-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-macos-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Run tests
+        run: mix test
