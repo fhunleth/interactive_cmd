@@ -13,7 +13,7 @@ tags: &tags
 
 ubuntu_tags: &ubuntu_tags
   [
-    1.19.1-erlang-28.1.1-ubuntu-noble-20240801,
+    1.19.3-erlang-26.2-ubuntu-noble-20251013,
   ]
 
 jobs:
