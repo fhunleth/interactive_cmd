@@ -46,6 +46,7 @@ jobs:
           keys:
             - v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
       - run: mix deps.get
+      - run: MIX_ENV=test mix compile
       - run: script -e -q /dev/null -c "mix test"
       - when:
           condition:
@@ -87,6 +88,7 @@ jobs:
           keys:
             - v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
       - run: mix deps.get
+      - run: MIX_ENV=test mix compile
       - run: script -e -q /dev/null -c "mix test"
       - save_cache:
           key: v1-mix-cache-<< parameters.tag >>-{{ checksum "mix.lock" }}
