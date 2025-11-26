@@ -54,14 +54,14 @@ defmodule InteractiveCmd do
 
     send(:user_drv, {self(), {:open_editor, ""}})
 
-    IO.puts("WAITING!!!!")
+    IO.puts(:stderr, "WAITING!!!!")
 
     result =
       receive do
         {_pid, {:editor_data, output}} -> output
       end
 
-    IO.puts("BACK!!!!!")
+    IO.puts(:stderr, "BACK!!!!!")
     File.cd!(original_dir)
     restore_env(original_env)
     {"", parse_exit_status(result)}
