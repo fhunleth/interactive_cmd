@@ -29,8 +29,6 @@ defmodule InteractiveCmd do
   """
   @spec cmd(binary(), [binary()], keyword()) :: {binary(), exit_status :: non_neg_integer()}
   def cmd(cmd, args, options \\ []) do
-    ensure_user_drv()
-
     original_env = System.get_env()
 
     quoted_cmd = Enum.map_join([cmd | args], " ", &shell_quote/1)
@@ -78,13 +76,6 @@ defmodule InteractiveCmd do
     case Integer.parse(trimmed) do
       {status, ""} when status >= 0 -> status
       _ -> 255
-    end
-  end
-
-  defp ensure_user_drv() do
-    # Start user_drv if running from a script.
-    if Process.whereis(:user_drv) == nil do
-      :user_drv.start([:"tty_sl -c -e", {Process.group_leader(), :tty}])
     end
   end
 end
