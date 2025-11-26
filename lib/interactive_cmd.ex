@@ -67,7 +67,7 @@ defmodule InteractiveCmd do
     case :os.type() do
       {:unix, :linux} ->
         # GNU version of script
-        ~s(sh -c 'script -q /dev/null -c "$INTERACTIVE_CMD_COMMAND"; echo $? > "$1"' sh)
+        ~s(sh -c 'script -e -q /dev/null -c "$INTERACTIVE_CMD_COMMAND"; echo $? > "$1"' sh)
 
       {:unix, _bsd} ->
         # BSD version of script
