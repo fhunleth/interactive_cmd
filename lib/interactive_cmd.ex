@@ -10,7 +10,7 @@ defmodule InteractiveCmd do
   @typedoc """
   Options for `cmd/3`
   """
-  @type options() :: [env: %{String.t() => String.t()}]
+  @type options() :: [env: %{String.t() => String.t()}, cd: String.t()]
 
   @doc """
   Starts an interactive command
@@ -27,6 +27,7 @@ defmodule InteractiveCmd do
   Options:
   * `:env` - a map of string key/value pairs to be put into the environment.
     See `System.put_env/1`.
+  * `:cd` - the directory to run the command in. See `System.cmd/3`.
 
   Returns `{"", exit_status}` where the first element is always an empty string
   and the second is the exit status of the command. This return value is
@@ -36,6 +37,11 @@ defmodule InteractiveCmd do
   @spec cmd(binary(), [binary()], options()) :: {binary(), exit_status :: non_neg_integer()}
   def cmd(cmd, args, options \\ []) do
     original_env = System.get_env()
+    original_dir = File.cwd!()
+
+    if cd = Keyword.get(options, :cd) do
+      File.cd!(cd)
+    end
 
     quoted_cmd = Enum.map_join([cmd | args], " ", &shell_quote/1)
     visual_cmd = launcher_command()
@@ -51,6 +57,7 @@ defmodule InteractiveCmd do
         {_pid, {:editor_data, output}} -> output
       end
 
+    File.cd!(original_dir)
     restore_env(original_env)
     {"", parse_exit_status(result)}
   end

@@ -77,5 +77,21 @@ defmodule InteractiveCmdTest do
       assert File.read(path) == {:ok, "interactive\n"}
       File.rm!(path)
     end
+
+    test "cd option" do
+      original_dir = File.cwd!()
+      temp_dir = System.tmp_dir!()
+
+      filename = "tmp_file_in_temp.txt"
+      path = Path.join(temp_dir, filename)
+      _ = File.rm(path)
+
+      {"", 0} = InteractiveCmd.cmd("touch", [filename], cd: temp_dir)
+
+      assert File.exists?(path)
+      assert File.cwd!() == original_dir
+
+      File.rm!(path)
+    end
   end
 end
