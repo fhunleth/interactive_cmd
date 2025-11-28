@@ -6,6 +6,10 @@ defmodule InteractiveCmdTest do
   use ExUnit.Case, async: false
   doctest InteractiveCmd
 
+  test "platform meets requirements" do
+    assert :ok == InteractiveCmd.check_requirements()
+  end
+
   test "runs a command" do
     path = "tmp_file.txt"
 
