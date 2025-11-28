@@ -102,4 +102,43 @@ defmodule InteractiveCmd do
       raise RuntimeError, "This doesn't appear to be an interactive session"
     end
   end
+
+  @doc """
+  Check if `cmd/3` should work
+
+  Returns `:ok` if it looks like the requirements are met. An error tuple is
+  returned if not. The caller can either implement a fallback or show the user
+  the error message.
+  """
+  @spec check_requirements() :: :ok | {:error, String.t()}
+  def check_requirements() do
+    with :ok <- platform_ok(),
+         :ok <- user_drv_ok(),
+         :ok <- has_executable("script") do
+      has_executable("stty")
+    end
+  end
+
+  defp platform_ok() do
+    case :os.type() do
+      {:unix, :darwin} -> :ok
+      {:unix, :linux} -> :ok
+      other -> {:error, "Unsupported platform: #{inspect(other)}"}
+    end
+  end
+
+  defp has_executable(program) do
+    case System.find_executable(program) do
+      nil -> {:error, "Required program not found: #{program}"}
+      _ -> :ok
+    end
+  end
+
+  defp user_drv_ok() do
+    if Process.whereis(:user_drv) != nil do
+      :ok
+    else
+      {:error, "This is not an interactive session. :user_drv not running"}
+    end
+  end
 end
