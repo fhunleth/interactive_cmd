@@ -40,7 +40,9 @@ a Docker container created by an Elixir script.
 
 ![InteractiveCmd Demo](demo/docker_demo.gif)
 
-## Installation
+## Installation and use
+
+`InteractiveCmd` only works on macOS and Linux.
 
 The package can be installed by adding `interactive_cmd` to your list of
 dependencies in `mix.exs`:
@@ -53,4 +55,72 @@ def deps do
 end
 ```
 
+You will also need the `stty` and `script` utilities available on macOS and
+Linux. These are usually already installed. If using on a minimal Linux image,
+you may need to install `util-linux`.
+
+Then in your code, do something like this on macOS:
+
+```elixir
+# macOS version
+iex> InteractiveCmd.cmd("brew", ["install", "nsnake"])
+...
+✔︎ Bottle nsnake (3.0.1)                                                                                                                                 [Downloaded  123.2KB/123.2KB]
+==> Pouring nsnake--3.0.1.arm64_tahoe.bottle.1.tar.gz
+{"", 0}
+```
+
+or on Linux:
+
+```elixir
+iex> InteractiveCmd.cmd("sudo", ["apt", "install", "nsnake"])
+[sudo] password for fhunleth:
+Reading package lists... Done
+Building dependency tree... Done
+...
+{"", 0}
+```
+
+The final line is a tuple with the output and exit status, like you'd get from
+`System.cmd/3`. Unlike `System.cmd/3`, output is not captured and is instead
+streamed directly to the terminal, so the first element is always an empty string.
+
+Now run the program you just installed:
+
+```elixir
+iex> nsnake = "nsnake" # set to "/usr/games/nsnake" on Linux
+iex> InteractiveCmd.cmd("nsnake", [])
+...
+```
+
+## Troubleshooting
+
+Since this repurposes an Erlang shell feature, this library could break on newer
+Erlang versions. Please check the Erlang versions tested on
+[CI](https://github.com/fhunleth/interactive_cmd/blob/main/.circleci/config.yml)
+to see which ones are expected to work.
+
+Next, try running your command via `System.cmd/3` to see if you get a better
+error message. If you get a better error message, please file an issue or send a
+PR to help others in the future.
+
+If all else fails, file an issue with details about your system and the command
+you're trying to run. It will be super helpful if there's some way I can
+reproduce it.
+
+## FAQ
+
+1. Can I use this in Escripts or Mix tasks?
+
+Yes. The implementation is one Elixir module with no native code. If you're
+writing a Mix task, just copy `interactive_cmd.ex` to your project and rename
+the module name to vendor it.
+
+2. Could this be rewritten in Erlang so that it could be used in other
+   BEAM languages?
+
+Yes. This totally makes sense to be a pure Erlang library. I didn't think about
+it until I was almost done. It seems really easy to do. If this interests you
+and you have a little time to spare to help verify and add instructions to the
+README, please file an issue.
 
