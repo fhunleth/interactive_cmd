@@ -10,6 +10,38 @@ defmodule InteractiveCmdTest do
     assert :ok == InteractiveCmd.check_requirements()
   end
 
+  describe "check_requirements/0 error cases" do
+    test "returns error for unsupported platform" do
+      assert {:error, "Unsupported platform: {:win32, :nt}"} ==
+               InteractiveCmd.platform_ok({:win32, :nt})
+    end
+
+    test "returns error when script executable is not available" do
+      assert {:error, "Required program not found: nonexistent_program_xyz"} ==
+               InteractiveCmd.has_executable("nonexistent_program_xyz")
+    end
+
+    test "returns error when stty executable is not available" do
+      # Test with a different nonexistent program to verify the message
+      assert {:error, "Required program not found: another_nonexistent_abc"} ==
+               InteractiveCmd.has_executable("another_nonexistent_abc")
+    end
+
+    test "platform_ok accepts darwin" do
+      assert :ok == InteractiveCmd.platform_ok({:unix, :darwin})
+    end
+
+    test "platform_ok accepts linux" do
+      assert :ok == InteractiveCmd.platform_ok({:unix, :linux})
+    end
+
+    test "has_executable returns ok for existing programs" do
+      # script and stty should exist on Linux/macOS systems
+      assert :ok == InteractiveCmd.has_executable("script")
+      assert :ok == InteractiveCmd.has_executable("stty")
+    end
+  end
+
   test "runs a command" do
     path = "tmp_file.txt"
 

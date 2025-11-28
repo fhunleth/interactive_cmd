@@ -119,22 +119,25 @@ defmodule InteractiveCmd do
     end
   end
 
-  defp platform_ok() do
-    case :os.type() do
+  @doc false
+  def platform_ok(os_type \\ :os.type()) do
+    case os_type do
       {:unix, :darwin} -> :ok
       {:unix, :linux} -> :ok
       other -> {:error, "Unsupported platform: #{inspect(other)}"}
     end
   end
 
-  defp has_executable(program) do
+  @doc false
+  def has_executable(program) do
     case System.find_executable(program) do
       nil -> {:error, "Required program not found: #{program}"}
       _ -> :ok
     end
   end
 
-  defp user_drv_ok() do
+  @doc false
+  def user_drv_ok() do
     if Process.whereis(:user_drv) != nil do
       :ok
     else
