@@ -110,10 +110,10 @@ reproduce it.
 
 ## FAQ
 
-1. Can I use this in Escripts or Mix tasks?
+1. Can I use this in Escripts or Mix archives?
 
 Yes. The implementation is one Elixir module with no native code. If you're
-writing a Mix task, just copy `interactive_cmd.ex` to your project and rename
+writing a Mix archive, just copy `interactive_cmd.ex` to your project and rename
 the module name to vendor it.
 
 2. Could this be rewritten in Erlang so that it could be used in other
