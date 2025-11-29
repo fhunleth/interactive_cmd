@@ -6,6 +6,18 @@ defmodule InteractiveCmdTest do
   use ExUnit.Case, async: false
   doctest InteractiveCmd
 
+  setup do
+    # There's a race with getting assertion failure messages printed to the
+    # console when running multiple tests. This doesn't seem that surprising
+    # that buffered output is lost when starting an interactive session even
+    # though I don't know whether that's happening. Adding a short wait before
+    # starting the next test works 100% of the time on my laptop. Everything
+    # else I tried had been flaky or just didn't work.
+    Process.sleep(50)
+
+    :ok
+  end
+
   test "platform meets requirements" do
     assert :ok == InteractiveCmd.check_requirements()
   end
