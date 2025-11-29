@@ -10,7 +10,7 @@ defmodule InteractiveCmd do
   @typedoc """
   Options for `cmd/3`
   """
-  @type options() :: [env: %{String.t() => String.t()}, cd: String.t()]
+  @type options() :: [env: Enumerable.t(), cd: String.t()]
 
   @doc """
   Starts an interactive command
