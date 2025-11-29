@@ -22,6 +22,17 @@ defmodule InteractiveCmdTest do
     assert :ok == InteractiveCmd.check_requirements()
   end
 
+  test "non-startup console fails" do
+    # Create a bogus group_leader that doesn't have :user_drv as its parent
+    {:ok, bogus_gl} = Agent.start_link(fn -> :ok end)
+    Process.group_leader(self(), bogus_gl)
+
+    assert {:error, message} = InteractiveCmd.check_requirements()
+    assert message == "Must be running on the startup console"
+
+    assert_raise RuntimeError, fn -> InteractiveCmd.cmd("ls", []) end
+  end
+
   test "runs a command" do
     path = "tmp_file.txt"
 

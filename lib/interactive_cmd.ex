@@ -98,8 +98,8 @@ defmodule InteractiveCmd do
   end
 
   defp ensure_user_drv() do
-    if Process.whereis(:user_drv) == nil do
-      raise RuntimeError, "This doesn't appear to be an interactive session"
+    with {:error, reason} <- user_drv_ok() do
+      raise RuntimeError, reason
     end
   end
 
@@ -135,10 +135,18 @@ defmodule InteractiveCmd do
   end
 
   defp user_drv_ok() do
-    if Process.whereis(:user_drv) != nil do
-      :ok
-    else
-      {:error, "This is not an interactive session. :user_drv not running"}
+    gl = Process.group_leader()
+    parent_gl = parent(gl)
+    user_drv = Process.whereis(:user_drv)
+
+    cond do
+      user_drv == nil -> {:error, "This is not an interactive session. :user_drv not running"}
+      user_drv != parent_gl -> {:error, "Must be running on the startup console"}
+      true -> :ok
     end
+  end
+
+  defp parent(pid) do
+    with {:parent, p} <- Process.info(pid, :parent), do: p
   end
 end
