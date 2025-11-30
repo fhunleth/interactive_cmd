@@ -119,8 +119,6 @@ the module name to vendor it.
 2. Could this be rewritten in Erlang so that it could be used in other
    BEAM languages?
 
-Yes. This totally makes sense to be a pure Erlang library. I didn't think about
-it until I was almost done. It seems really easy to do. If this interests you
-and you have a little time to spare to help verify and add instructions to the
-README, please file an issue.
-
+Yes. This totally makes sense as a pure Erlang library. I didn't think about it
+until I was almost done. It seems easy to do. If this interests you and you have
+time to help verify and add instructions to the README, please file an issue.
