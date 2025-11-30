@@ -7,6 +7,12 @@
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.2
+
+* Changes
+  * Add `shell/2` to avoid needing to manually call `sh -c` when updating calls
+    to `System.shell/2`.
+
 ## v0.1.1
 
 * Changes
