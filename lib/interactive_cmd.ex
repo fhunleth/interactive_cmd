@@ -13,7 +13,7 @@ defmodule InteractiveCmd do
   @type options() :: [env: Enumerable.t(), cd: String.t()]
 
   @doc """
-  Starts an interactive command
+  Executes the given command with args interactively
 
   This shell will take over the terminal so that it's possible for the user to
   interact with whatever program is run. All input is sent to the command
@@ -35,7 +35,27 @@ defmodule InteractiveCmd do
   swapped in quickly when needed.
   """
   @spec cmd(binary(), [binary()], options()) :: {binary(), exit_status :: non_neg_integer()}
-  def cmd(cmd, args, options \\ []) do
+  def cmd(command, args, options \\ []) do
+    quoted_command = Enum.map_join([command | args], " ", &shell_quote/1)
+    shell(quoted_command, options)
+  end
+
+  @doc """
+  Executes the given command interactively
+
+  It uses `sh` to evaluate the command.
+
+  > #### Watch out {: .warning}
+  >
+  > Use this function with care. In particular, **never pass untrusted user input
+  > to this function**, as the user would be able to perform "command injection
+  > attacks" by executing any code directly on the machine. Generally speaking,
+  > prefer to use `cmd/3` over this function.
+
+  See `cmd/3` for more information and options.
+  """
+  @spec shell(binary(), options()) :: {binary(), exit_status :: non_neg_integer()}
+  def shell(command, options \\ []) do
     ensure_user_drv()
 
     original_env = System.get_env()
@@ -45,11 +65,10 @@ defmodule InteractiveCmd do
       File.cd!(cd)
     end
 
-    quoted_cmd = Enum.map_join([cmd | args], " ", &shell_quote/1)
     visual_cmd = launcher_command()
 
     System.put_env(Keyword.get(options, :env, %{}))
-    System.put_env("INTERACTIVE_CMD_COMMAND", quoted_cmd)
+    System.put_env("INTERACTIVE_CMD_COMMAND", command)
     System.put_env("VISUAL", visual_cmd)
 
     send(:user_drv, {self(), {:open_editor, ""}})
