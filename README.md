@@ -29,9 +29,9 @@ server, for example. Huge thanks to [ieQu1 on the Erlang
 Forum](https://erlangforums.com/t/entering-raw-mode-temporarily-while-in-the-shell-for-a-tui/5120/5)
 for the original idea.
 
-Using this is simply replacing your call to `System.cmd/3` with
-`InteractiveCmd.cmd/3`. Note that output capture operations aren't supported,
-but you can still pass environment variables and capture exit status.
+Using this is simply replacing your calls to `System.cmd/3` or `System.shell/2`
+with the similarly named ones in `InteractiveCmd`. Output capture options are
+ignored.
 
 ## Example
 
@@ -63,7 +63,7 @@ Then in your code, do something like this on macOS:
 
 ```elixir
 # macOS version
-iex> InteractiveCmd.cmd("brew", ["install", "nsnake"])
+iex> InteractiveCmd.shell("brew install nsnake")
 ...
 ✔︎ Bottle nsnake (3.0.1)                                                                                                                                 [Downloaded  123.2KB/123.2KB]
 ==> Pouring nsnake--3.0.1.arm64_tahoe.bottle.1.tar.gz
@@ -73,7 +73,7 @@ iex> InteractiveCmd.cmd("brew", ["install", "nsnake"])
 or on Linux:
 
 ```elixir
-iex> InteractiveCmd.cmd("sudo", ["apt", "install", "nsnake"])
+iex> InteractiveCmd.shell("sudo apt install nsnake")
 [sudo] password for fhunleth:
 Reading package lists... Done
 Building dependency tree... Done
@@ -82,8 +82,9 @@ Building dependency tree... Done
 ```
 
 The final line is a tuple with the output and exit status, like you'd get from
-`System.cmd/3`. Unlike `System.cmd/3`, output is not captured and is instead
-streamed directly to the terminal, so the first element is always an empty string.
+`System.shell/2`. Unlike `System.shell/2`, output is not captured and is instead
+streamed directly to the terminal, so the first element is always an empty
+string.
 
 Now run the program you just installed:
 
