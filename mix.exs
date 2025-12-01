@@ -9,7 +9,7 @@ defmodule InteractiveCmd.MixProject do
     [
       app: :interactive_cmd,
       version: @version,
-      elixir: "~> 1.16",
+      elixir: "~> 1.15",
       description: @description,
       package: package(),
       source_url: @source_url,
