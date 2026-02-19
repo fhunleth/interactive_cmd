@@ -10,7 +10,7 @@ defmodule InteractiveCmd do
   @typedoc """
   Options for `cmd/3`
   """
-  @type options() :: [env: Enumerable.t(), cd: String.t()]
+  @type options() :: [env: Enumerable.t(), cd: String.t(), log_path: String.t()]
 
   @doc """
   Executes the given command with args interactively
@@ -28,6 +28,8 @@ defmodule InteractiveCmd do
   * `:env` - a map of string key/value pairs to be put into the environment.
     See `System.put_env/1`.
   * `:cd` - the directory to run the command in. See `System.cmd/3`.
+  * `:log_path` - if specified, all output is logged to this file. Defaults to
+    `/dev/null`
 
   Returns `{"", exit_status}` where the first element is always an empty string
   and the second is the exit status of the command. This return value is
@@ -65,11 +67,18 @@ defmodule InteractiveCmd do
       File.cd!(cd)
     end
 
-    visual_cmd = launcher_command()
+    log_path =
+      case Keyword.get(options, :log_path) do
+        nil -> "/dev/null"
+        path -> Path.expand(path)
+      end
+
+    flavor = script_flavor()
 
     System.put_env(Keyword.get(options, :env, %{}))
     System.put_env("INTERACTIVE_CMD_COMMAND", command)
-    System.put_env("VISUAL", visual_cmd)
+    System.put_env("INTERACTIVE_CMD_LOG_PATH", log_path)
+    System.put_env("VISUAL", launcher_command(flavor))
 
     send(:user_drv, {self(), {:open_editor, ""}})
 
@@ -78,22 +87,62 @@ defmodule InteractiveCmd do
         {_pid, {:editor_data, output}} -> output
       end
 
+    if log_path != "/dev/null" and adds_log_header(flavor) do
+      strip_script_headers(log_path)
+    end
+
     File.cd!(original_dir)
     restore_env(original_env)
     {"", parse_exit_status(result)}
   end
 
-  defp launcher_command() do
-    # $1 is the results filename from user_drv
+  defp script_flavor() do
     case :os.type() do
-      {:unix, :linux} ->
-        # GNU version of script
-        ~s(sh -c 'stty opost;script -e -q /dev/null -c "$INTERACTIVE_CMD_COMMAND"; echo $? > "$1"' sh)
-
-      {:unix, _bsd} ->
-        # BSD version of script
-        ~s(sh -c 'stty opost;script -q /dev/null sh -c "$INTERACTIVE_CMD_COMMAND"; echo $? > "$1"' sh)
+      {:unix, :linux} -> :gnu
+      {:unix, _bsd} -> :bsd
     end
+  end
+
+  # $1 is the results filename from user_drv
+  defp launcher_command(:gnu) do
+    ~s(sh -c 'stty opost;script -e -q "$INTERACTIVE_CMD_LOG_PATH" -c "$INTERACTIVE_CMD_COMMAND"; echo $? > "$1"' sh)
+  end
+
+  defp launcher_command(:bsd) do
+    ~s(sh -c 'stty opost;script -q "$INTERACTIVE_CMD_LOG_PATH" sh -c "$INTERACTIVE_CMD_COMMAND"; echo $? > "$1"' sh)
+  end
+
+  # GNU script (util-linux >= 2.35) always writes header and trailer
+  defp adds_log_header(:gnu), do: true
+  defp adds_log_header(:bsd), do: false
+
+  defp strip_script_headers(path) do
+    tmp_path = path <> ".tmp"
+    out = File.stream!(tmp_path)
+    File.stream!(path) |> trim_first_and_last_lines() |> Stream.into(out) |> Stream.run()
+    File.rm!(path)
+    File.rename!(tmp_path, path)
+  end
+
+  @doc false
+  @spec trim_first_and_last_lines(Enumerable.t()) :: Enumerable.t()
+  def trim_first_and_last_lines(lines) do
+    lines
+    |> Stream.drop(1)
+    |> Stream.transform(
+      fn -> :empty end,
+      fn
+        line, :empty -> {[], [line]}
+        line, [a] -> {[], [a, line]}
+        line, [a, b] -> {[a], [b, line]}
+      end,
+      fn
+        ["\n", _] -> {[], []}
+        [a, _] -> {[String.replace_suffix(a, "\n", "")], []}
+        _ -> {[], []}
+      end,
+      &Function.identity/1
+    )
   end
 
   defp restore_env(original) do

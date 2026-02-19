@@ -120,6 +120,46 @@ defmodule InteractiveCmdTest do
 
       File.rm!(path)
     end
+
+    test "log_path option" do
+      temp_dir = System.tmp_dir!()
+
+      filename = "tmp_file with spaces.log"
+      path = Path.join(temp_dir, filename)
+      _ = File.rm(path)
+
+      # Print dots to be less obtrusive to mix test output
+      {"", 0} = InteractiveCmd.cmd("printf", ["..."], log_path: path)
+
+      assert File.read!(path) == "..."
+      File.rm!(path)
+    end
+
+    test "log_path option with quotes in path" do
+      temp_dir = System.tmp_dir!()
+
+      filename = ~s(tmp_file "with quotes".log)
+      path = Path.join(temp_dir, filename)
+      _ = File.rm(path)
+
+      {"", 0} = InteractiveCmd.cmd("printf", ["...."], log_path: path)
+
+      assert File.read!(path) == "...."
+      File.rm!(path)
+    end
+
+    test "log_path option with special characters in path" do
+      temp_dir = System.tmp_dir!()
+
+      filename = "tmp_file_$with_!special&.log"
+      path = Path.join(temp_dir, filename)
+      _ = File.rm(path)
+
+      {"", 0} = InteractiveCmd.cmd("printf", ["....."], log_path: path)
+
+      assert File.read!(path) == "....."
+      File.rm!(path)
+    end
   end
 
   describe "shell/2" do
@@ -149,6 +189,63 @@ defmodule InteractiveCmdTest do
       File.rm!(path)
 
       assert System.get_env(env_name) == nil
+    end
+  end
+
+  describe "trim_first_and_last_lines/1" do
+    defp trim_first_and_last_lines(input) do
+      {:ok, result} =
+        StringIO.open(input, [], fn pid ->
+          IO.stream(pid, :line) |> InteractiveCmd.trim_first_and_last_lines() |> Enum.to_list()
+        end)
+
+      result
+    end
+
+    test "strips header and footer from single-line output" do
+      input = """
+      Script started on 2026-02-19 17:57:56-05:00 [COMMAND="printf hello" TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="112" LINES="22"]
+      hello
+      Script done on 2026-02-19 17:57:56-05:00 [COMMAND_EXIT_CODE="0"]
+      """
+
+      assert trim_first_and_last_lines(input) == ["hello"]
+    end
+
+    test "strips header and footer from single-line output with trailing newline" do
+      input = """
+      Script started on 2026-02-19 17:58:51-05:00 [COMMAND="printf 'hello\\n'" TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="112" LINES="22"]
+      hello
+
+      Script done on 2026-02-19 17:58:51-05:00 [COMMAND_EXIT_CODE="0"]
+      """
+
+      assert trim_first_and_last_lines(input) == ["hello\n"]
+    end
+
+    test "strips header and footer from multi-line output" do
+      input =
+        """
+        Script started on 2026-02-19 17:59:43-05:00 [COMMAND="printf 'line1\\nline2\\nline3\\n'" TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="112" LINES="22"]
+        line1
+        line2
+        line3
+
+        Script done on 2026-02-19 17:59:43-05:00 [COMMAND_EXIT_CODE="0"]
+        """
+
+      assert trim_first_and_last_lines(input) == ["line1\n", "line2\n", "line3\n"]
+    end
+
+    test "strips header and footer with empty output" do
+      input =
+        """
+        Script started on 2026-02-19 18:03:20-05:00 [COMMAND="true" TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="112" LINES="22"]
+
+        Script done on 2026-02-19 18:03:20-05:00 [COMMAND_EXIT_CODE="0"]
+        """
+
+      assert trim_first_and_last_lines(input) == []
     end
   end
 end
