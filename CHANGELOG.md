@@ -7,6 +7,13 @@
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.3
+
+* Changes
+  * Add `:log_path` for logging stdout (not stdin). Logging happens outside of
+    Erlang via the `script(1)` command. This is useful for capturing output from
+    long build tasks.
+
 ## v0.1.2
 
 * Changes
