@@ -3,7 +3,7 @@ version: 2.1
 latest: &latest
   pattern: "^1.19.*-erlang-28.*$"
 
-tags: &tags
+alpine_tags: &alpine_tags
   [
     1.19.5-erlang-28.3.2-alpine-3.23.3,
     1.18.3-erlang-27.3.4-alpine-3.22.2,
@@ -16,6 +16,13 @@ ubuntu_tags: &ubuntu_tags
   [
     1.19.3-erlang-28.1.1-ubuntu-noble-20251013,
     1.18.3-erlang-27.3.4-ubuntu-noble-20251013
+  ]
+
+xcode_versions: &xcode_versions
+  [
+    15.4.0,
+    16.4.0,
+    26.3.0
   ]
 
 jobs:
@@ -101,8 +108,11 @@ jobs:
             - deps
 
   build-test-macos:
+    parameters:
+      xcode:
+        type: string
     macos:
-      xcode: 15.4.0
+      xcode: << parameters.xcode >>
     working_directory: ~/repo
     environment:
       LC_ALL: C.UTF-8
@@ -127,15 +137,15 @@ workflows:
             tags:
               only: /.*/
       - build-test:
-          name: << matrix.tag >>
+          name: alpine-<< matrix.tag >>
           matrix:
             parameters:
-              tag: *tags
+              tag: *alpine_tags
           filters:
             tags:
               only: /.*/
       - build-test-ubuntu:
-          name: << matrix.tag >>
+          name: ubuntu-<< matrix.tag >>
           matrix:
             parameters:
               tag: *ubuntu_tags
@@ -143,6 +153,10 @@ workflows:
             tags:
               only: /.*/
       - build-test-macos:
+          name: macos-<< matrix.xcode >>
+          matrix:
+            parameters:
+              xcode: *xcode_versions
           filters:
             tags:
               only: /.*/"
