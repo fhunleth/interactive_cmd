@@ -65,7 +65,7 @@ Then in your code, do something like this on macOS:
 # macOS version
 iex> InteractiveCmd.shell("brew install nsnake")
 ...
-✔︎ Bottle nsnake (3.0.1)                                                                                                                                 [Downloaded  123.2KB/123.2KB]
+✔︎ Bottle nsnake (3.0.1)                             [Downloaded  123.2KB/123.2KB]
 ==> Pouring nsnake--3.0.1.arm64_tahoe.bottle.1.tar.gz
 {"", 0}
 ```
@@ -117,7 +117,16 @@ Yes. The implementation is one Elixir module with no native code. If you're
 writing a Mix archive, just copy `interactive_cmd.ex` to your project and rename
 the module name to vendor it.
 
-2. Could this be rewritten in Erlang so that it could be used in other
+2. What about security?
+
+The normal caveats apply to running shell commands so be sure to scrub any
+untrusted sources. Additionally, `InteractiveCmd.cmd/3` doesn't directly run the
+executable like `System.cmd/3` does, so it's more susceptable to injection
+attacks than may be obvious. I've taken precautions to escape strings so easy
+injection attacks shouldn't work. If your use case is susceptible to malicious
+users, please take normal precautions.
+
+3. Could this be rewritten in Erlang so that it could be used in other
    BEAM languages?
 
 Yes. This totally makes sense as a pure Erlang library. I didn't think about it
