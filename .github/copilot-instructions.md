@@ -1,0 +1,1 @@
+When reviewing pull requests, do not post a PR summary. If there is an overall concern with the PR, post at most one PR comment discussing it. Otherwise, only post review comments directly on the relevant lines of code.
