@@ -105,7 +105,7 @@ defmodule InteractiveCmd do
 
   # $1 is the results filename from user_drv
   defp launcher_command(:gnu) do
-    ~s(sh -c 'stty opost;script -e -q "$INTERACTIVE_CMD_LOG_PATH" -c "$INTERACTIVE_CMD_COMMAND"; echo $? > "$1"' sh)
+    ~s(sh -c 'stty opost;script -e -c "$INTERACTIVE_CMD_COMMAND" -q "$INTERACTIVE_CMD_LOG_PATH"; echo $? > "$1"' sh)
   end
 
   defp launcher_command(:bsd) do
