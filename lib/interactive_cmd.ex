@@ -105,6 +105,8 @@ defmodule InteractiveCmd do
 
   # $1 is the results filename from user_drv
   defp launcher_command(:gnu) do
+    # -c needs to come before -q in util-linux 2.42.
+    # https://github.com/util-linux/util-linux/issues/4257
     ~s(sh -c 'stty opost;script -e -c "$INTERACTIVE_CMD_COMMAND" -q "$INTERACTIVE_CMD_LOG_PATH"; echo $? > "$1"' sh)
   end
 
