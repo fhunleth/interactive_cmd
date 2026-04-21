@@ -7,6 +7,12 @@
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.4
+
+* Changes
+  * Fixed script argument order error introduced around util-linux 2.42. Thanks
+    to @CJRChang.
+
 ## v0.1.3
 
 * Changes
