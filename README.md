@@ -7,6 +7,7 @@
 
 [![Hex version](https://img.shields.io/hexpm/v/interactive_cmd.svg "Hex version")](https://hex.pm/packages/interactive_cmd)
 [![API docs](https://img.shields.io/hexpm/v/interactive_cmd.svg?label=hexdocs "API docs")](https://interactive-cmd.hexdocs.pm/InteractiveCmd.html)
+[![Nerves compatibility](https://compatibility.nerves-project.org/badge/interactive_cmd.svg)](https://compatibility.nerves-project.org/packages/interactive_cmd)
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/fhunleth/interactive_cmd/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/fhunleth/interactive_cmd/tree/main)
 [![REUSE status](https://api.reuse.software/badge/github.com/fhunleth/interactive_cmd)](https://api.reuse.software/info/github.com/fhunleth/interactive_cmd)
 
